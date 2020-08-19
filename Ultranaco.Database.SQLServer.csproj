@@ -19,6 +19,7 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
     <PackageReference Include="Ultranaco.Appsettings" Version="0.0.2" />
     <PackageReference Include="Ultranaco.Objects" Version="0.0.2" />
+    <None Include="Assets/SqlServerSpatial140.dll" Pack="true" PackagePath="assets/SqlServerSpatial140.dll" />
   </ItemGroup>
 
 </Project>
