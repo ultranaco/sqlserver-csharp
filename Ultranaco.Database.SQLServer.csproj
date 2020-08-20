@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <Authors>Alejandro Piña</Authors>
     <Company>Ultranaco Labs</Company>
     <RepositoryUrl>https://github.com/ultranaco/sqlserver-csharp</RepositoryUrl>
@@ -18,7 +18,7 @@
     <PackageReference Include="NetTopologySuite.IO.SqlServerBytes" Version="1.15.1" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
     <PackageReference Include="Ultranaco.Appsettings" Version="0.0.2" />
-    <PackageReference Include="Ultranaco.Objects" Version="0.0.2" />
+    <PackageReference Include="Ultranaco.Objects" Version="0.0.3" />
     <None Include="Assets/SqlServerSpatial140.dll" Pack="true" PackagePath="assets/SqlServerSpatial140.dll" />
   </ItemGroup>
 
