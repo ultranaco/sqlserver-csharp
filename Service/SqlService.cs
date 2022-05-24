@@ -112,7 +112,7 @@ OFFSET {2} ROWS FETCH NEXT 1 ROWS ONLY
          catch (Exception e)
          {
             this.Dispose();
-            throw e;
+            throw new Exception("SQL error in scroll", e);
          }
       }
 
@@ -165,7 +165,7 @@ ELSE
          catch (Exception e)
          {
             this.Dispose();
-            throw e;
+            throw new Exception("Error in cursor", e);
          }
       }
 
@@ -209,7 +209,7 @@ SELECT @cur_status cursor_status;
          catch (Exception e)
          {
             this.Dispose();
-            throw e;
+            throw new Exception("Error in cursor", e);
          }
       }
 

@@ -1,5 +1,5 @@
-﻿using GeoAPI.Geometries;
-using Microsoft.SqlServer.Types;
+﻿using Microsoft.SqlServer.Types;
+using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using Newtonsoft.Json;
 using System;
@@ -12,29 +12,26 @@ namespace Ultranaco.Database.SQLServer.Objects
 {
   public static class GeometryExtend
   {
-    public static string ToGeoJson(this IGeometry geometry, Dictionary<string, object> attributes = null)
+    public static string ToGeoJson(this Geometry geometry, Dictionary<string, object> attributes = null)
     {
       var feature = new NetTopologySuite.Features.Feature(geometry, new NetTopologySuite.Features.AttributesTable());
 
       if (attributes != null)
         foreach (var att in attributes)
-          feature.Attributes.AddAttribute(att.Key, att.Value);
+          feature.Attributes.Add(att.Key, att.Value);
       
-      //var featureCollection = new NetTopologySuite.Features.FeatureCollection();
-      //featureCollection.Add(feature);
       var sb = new StringBuilder();
       var serializer = NetTopologySuite.IO.GeoJsonSerializer.Create();
       serializer.Formatting = Newtonsoft.Json.Formatting.Indented;
       using (var sw = new StringWriter(sb))
       {
-        //serializer.Serialize(sw, featureCollection);
         serializer.Serialize(sw, feature);
       }
       var result = sb.ToString();
       return result;
     }
 
-    public static IGeometry GeoJsonToGeometry(this string geojson, int SRID = 4326)
+    public static Geometry GeoJsonToGeometry(this string geojson, int SRID = 4326)
     {
       JsonTextReader reader = new JsonTextReader(new StringReader(geojson));
       var serializer = NetTopologySuite.IO.GeoJsonSerializer.Create();
@@ -50,7 +47,7 @@ namespace Ultranaco.Database.SQLServer.Objects
       return geography;
     }
 
-    public static SqlGeography GeometryToSQL(this IGeometry geometry, int SRID = 4326, bool isgeography = true)
+    public static SqlGeography GeometryToSQL(this Geometry geometry, int SRID = 4326, bool isgeography = true)
     {
       var geometryWriter = new SqlServerBytesWriter { IsGeography = isgeography };
       geometry.SRID = SRID;
@@ -60,7 +57,7 @@ namespace Ultranaco.Database.SQLServer.Objects
       return geography;
     }
 
-    public static SqlBytes GeometryToSQlBytes(this IGeometry geometry, int SRID = 4326, bool isgeography = true)
+    public static SqlBytes GeometryToSQlBytes(this Geometry geometry, int SRID = 4326, bool isgeography = true)
     {
       var geometryWriter = new SqlServerBytesWriter { IsGeography = isgeography };
       geometry.SRID = SRID;
@@ -69,7 +66,7 @@ namespace Ultranaco.Database.SQLServer.Objects
       return geographyRaw;
     }
 
-    public static string GeometryToHexString(this IGeometry geometry, int SRID = 4326, bool isgeography = true)
+    public static string GeometryToHexString(this Geometry geometry, int SRID = 4326, bool isgeography = true)
     {
       var sqlGeography = geometry.GeometryToSQlBytes();
       var rawPolygon = BitConverter.ToString(sqlGeography.Value)
