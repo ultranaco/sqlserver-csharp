@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ultranaco.Database.SQLServer.Service
 {
@@ -24,7 +22,7 @@ namespace Ultranaco.Database.SQLServer.Service
       private void Connect(string connectionString, bool isPrefixName = true)
       {
          if (isPrefixName)
-            _connectionString = ConnectionStringService.Get(connectionString);
+            _connectionString = ConnectionStringParameter.Get(connectionString);
          else
             _connectionString = connectionString;
          
