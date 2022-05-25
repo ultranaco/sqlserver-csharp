@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Version>0.0.6</Version>
+    <Version>0.0.7</Version>
     <Authors>Alejandro Piña</Authors>
     <Company>Ultranaco Labs</Company>
     <RepositoryUrl>https://github.com/ultranaco/sqlserver-csharp</RepositoryUrl>
