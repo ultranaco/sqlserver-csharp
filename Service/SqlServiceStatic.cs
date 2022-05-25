@@ -21,7 +21,7 @@ namespace Ultranaco.Database.SQLServer.Service
     {
       T result;
 
-      result = _sqlService.ExecuteReader(sql, parameters, mapper).FirstOrDefault();
+      result = _sqlService.ExecuteReader(sql, parameters, mapper, 0).FirstOrDefault();
 
       return result;
     }

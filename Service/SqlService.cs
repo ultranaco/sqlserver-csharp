@@ -51,7 +51,7 @@ namespace Ultranaco.Database.SQLServer.Service
       return ExecuteReader(sql, parameters, mapper).ToList();
     }
 
-    public IEnumerable<T> ExecuteReader<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper)
+    public IEnumerable<T> ExecuteReader<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper, int indexBreak = -1)
     {
       List<T> result = new List<T>();
 
@@ -60,8 +60,14 @@ namespace Ultranaco.Database.SQLServer.Service
         command.Parameters.AddRange(parameters.ToArray());
         using (IDataReader reader = command.ExecuteReader())
         {
+          var index = 0;
           while (reader.Read())
+          {
             result.Add(mapper(reader));
+            if (indexBreak > -1 && indexBreak == index)
+              break;
+            index++;
+          }
 
           command.Parameters.Clear();
           parameters = new List<SqlParameter>();
