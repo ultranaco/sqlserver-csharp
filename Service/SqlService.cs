@@ -8,126 +8,134 @@ using System.Linq;
 
 namespace Ultranaco.Database.SQLServer.Service
 {
-   public partial class SqlService : IDisposable
-   {
-      private SqlConnection _connection;
-      private string _connectionString;
-      public int _offset = 0;
+  public partial class SqlService : IDisposable
+  {
+    private SqlConnection _connection;
+    private string _connectionString;
+    public int _offset = 0;
 
-      public SqlService(string connectionString, bool isPrefixName = true)
+    // TODO: make services pool to handle multiples connections
+    private static SqlService _sqlService;
+
+    public SqlService(string connectionString, bool isPrefixName = true)
+    {
+      this.Connect(connectionString, isPrefixName);
+    }
+
+    private void Connect(string connectionString, bool useConfigFile = true)
+    {
+      if (useConfigFile)
+        _connectionString = ConnectionStringParameter.Get(connectionString);
+      else
+        _connectionString = connectionString;
+
+      if (_connection == null || (_connection != null && _connection.State != ConnectionState.Open))
       {
-         this.Connect(connectionString, isPrefixName);
+        _connection = new SqlConnection(_connectionString);
+        _connection.Open();
       }
 
-      private void Connect(string connectionString, bool isPrefixName = true)
+      if (_sqlService == null)
       {
-         if (isPrefixName)
-            _connectionString = ConnectionStringParameter.Get(connectionString);
-         else
-            _connectionString = connectionString;
-         
-         if (_connection == null || (_connection != null && _connection.State != ConnectionState.Open))
-         {
-            _connection = new SqlConnection(_connectionString);
-            _connection.Open();
-         }
+        _sqlService = this;
+      }
+    }
+
+    public T ExecuteObject<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper)
+    {
+      return this.ExecuteList(sql, parameters, mapper).FirstOrDefault();
+    }
+
+    public List<T> ExecuteList<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper)
+    {
+      return ExecuteReader(sql, parameters, mapper).ToList();
+    }
+
+    public IEnumerable<T> ExecuteReader<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper)
+    {
+      List<T> result = new List<T>();
+
+      using (var command = new SqlCommand(sql, _connection))
+      {
+        command.Parameters.AddRange(parameters.ToArray());
+        using (IDataReader reader = command.ExecuteReader())
+        {
+          while (reader.Read())
+            result.Add(mapper(reader));
+
+          command.Parameters.Clear();
+          parameters = new List<SqlParameter>();
+        }
       }
 
-      public T ExecuteObject<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper)
+      return result;
+    }
+
+    public int ExecuteNonQuery(string sql, IEnumerable<SqlParameter> parameters)
+    {
+      int result;
+      using (var command = new SqlCommand(sql, _connection))
       {
-         return this.ExecuteList(sql, parameters, mapper).FirstOrDefault();
+        command.Parameters.AddRange(parameters.ToArray());
+        result = command.ExecuteNonQuery();
+        command.Parameters.Clear();
+        parameters = new List<SqlParameter>();
+      }
+      return result;
+    }
+
+    public object ExecuteScalar(string sql, IEnumerable<SqlParameter> parameters)
+    {
+      object result;
+      using (var command = new SqlCommand(sql, _connection))
+      {
+        command.Parameters.AddRange(parameters.ToArray());
+        result = command.ExecuteScalar();
+        command.Parameters.Clear();
+        parameters = new List<SqlParameter>();
       }
 
-      public List<T> ExecuteList<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper)
-      {
-         return ExecuteReader(sql, parameters, mapper).ToList();
-      }
+      return result;
+    }
 
-      public IEnumerable<T> ExecuteReader<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper)
-      {
-         List<T> result = new List<T>();
-
-         using (var command = new SqlCommand(sql, _connection))
-         {
-            command.Parameters.AddRange(parameters.ToArray());
-            using (IDataReader reader = command.ExecuteReader())
-            {
-               while (reader.Read())
-                  result.Add(mapper(reader));
-
-               command.Parameters.Clear();
-               parameters = new List<SqlParameter>();
-            }
-         }
-
-         return result;
-      }
-
-      public int ExecuteNonQuery(string sql, IEnumerable<SqlParameter> parameters)
-      {
-         int result;
-         using (var command = new SqlCommand(sql, _connection))
-         {
-            command.Parameters.AddRange(parameters.ToArray());
-            result = command.ExecuteNonQuery();
-            command.Parameters.Clear();
-            parameters = new List<SqlParameter>();
-         }
-         return result;
-      }
-
-      public object ExecuteScalar(string sql, IEnumerable<SqlParameter> parameters)
-      {
-         object result;
-         using (var command = new SqlCommand(sql, _connection))
-         {
-            command.Parameters.AddRange(parameters.ToArray());
-            result = command.ExecuteScalar();
-            command.Parameters.Clear();
-            parameters = new List<SqlParameter>();
-         }
-
-         return result;
-      }
-
-      public T Scroll<T>(string sql, IEnumerable<SqlParameter> @params, string orderBy, Func<IDataReader, T> rowMapper)
-      {
-         this.Connect(_connectionString, false);
-         sql = String.Format(@"
+    public T Scroll<T>(string sql, IEnumerable<SqlParameter> @params, string orderBy, Func<IDataReader, T> rowMapper)
+    {
+      this.Connect(_connectionString, false);
+      sql = String.Format(@"
 SELECT  * FROM (
 {0}
 ) rowSet
 ORDER BY {1} 
 OFFSET {2} ROWS FETCH NEXT 1 ROWS ONLY
-",sql, orderBy, _offset).Replace(";", "");
-         try
-         {
-            var result = this.ExecuteObject(sql, @params, rowMapper);
-            _offset++;
-            _connection.Close();
-            return result;
-         }
-         catch (Exception e)
-         {
-            this.Dispose();
-            throw new Exception("SQL error in scroll", e);
-         }
-      }
-
-      /// <summary>
-      /// Retrieves fetch rows from sql sentences, if not anymore restart cursor or sqlConnection closes when cursor is deadllocked automatically
-      /// </summary>
-      /// <typeparam name="T">Generic type</typeparam>
-      /// <param name="sql">sql sentence</param>
-      /// <param name="params"></param>
-      /// <param name="cursorName"></param>
-      /// <param name="db"></param>
-      /// <param name="rowMapper"></param>
-      /// <param name="timeOut"></param>
-      /// <returns></returns>
-      public T ScrollForward<T>(string sql, IEnumerable<SqlParameter> @params, string cursorName, Func<IDataReader, T>  rowMapper)
+", sql, orderBy, _offset).Replace(";", "");
+      try
       {
-         sql = String.Format(@"
+        var result = this.ExecuteObject(sql, @params, rowMapper);
+        _offset++;
+        _connection.Close();
+        return result;
+      }
+      catch (Exception e)
+      {
+        this.Dispose();
+        throw new Exception("SQL error in scroll", e);
+      }
+    }
+
+    /// <summary>
+    /// Retrieves fetch rows from sql sentences, if not anymore restart cursor or sqlConnection closes when cursor is deadllocked automatically
+    /// </summary>
+    /// <typeparam name="T">Generic type</typeparam>
+    /// <param name="sql">sql sentence</param>
+    /// <param name="params"></param>
+    /// <param name="cursorName"></param>
+    /// <param name="db"></param>
+    /// <param name="rowMapper"></param>
+    /// <param name="timeOut"></param>
+    /// <returns></returns>
+    public T ScrollForward<T>(string sql, IEnumerable<SqlParameter> @params, string cursorName, Func<IDataReader, T> rowMapper)
+    {
+      sql = String.Format(@"
 DECLARE @cur_status int;
 SET @cur_status = CURSOR_STATUS('global', '{1}');
 
@@ -156,27 +164,27 @@ ELSE
       END
 	END
 ", sql, cursorName);
-         try
-         {
-            return this.ExecuteObject(sql, @params, rowMapper);
-         }
-         catch (Exception e)
-         {
-            this.Dispose();
-            throw new Exception("Error in cursor", e);
-         }
-      }
-
-      /// <summary>
-      /// Closes scroll by cursorName
-      /// </summary>
-      /// <param name="cursorName"></param>
-      /// <param name="db"></param>
-      /// <param name="timeOut"></param>
-      /// <returns></returns>
-      public int CloseScroll(string cursorName)
+      try
       {
-         var sql = String.Format(@"
+        return this.ExecuteObject(sql, @params, rowMapper);
+      }
+      catch (Exception e)
+      {
+        this.Dispose();
+        throw new Exception("Error in cursor", e);
+      }
+    }
+
+    /// <summary>
+    /// Closes scroll by cursorName
+    /// </summary>
+    /// <param name="cursorName"></param>
+    /// <param name="db"></param>
+    /// <param name="timeOut"></param>
+    /// <returns></returns>
+    public int CloseScroll(string cursorName)
+    {
+      var sql = String.Format(@"
 DECLARE @cur_status int;
 SET @cur_status = CURSOR_STATUS('global', @cursorName);
 IF @cur_status = -1
@@ -191,30 +199,30 @@ ELSE
 SET @cur_status = CURSOR_STATUS('global', @cursorName);
 SELECT @cur_status cursor_status;
 ", cursorName);
-         try
-         {
-            var result = this.ExecuteObject(sql, new SqlParameter[]
-            {
-              new SqlParameter("@cursorName", cursorName)
-            }, (r) =>
-            {
-               return r["cursor_status"].GetInt32();
-            });
-            
-            return result;
-            
-         }
-         catch (Exception e)
-         {
-            this.Dispose();
-            throw new Exception("Error in cursor", e);
-         }
-      }
-
-      public void Dispose()
+      try
       {
-         _connection.Close();
-         _offset = 0;
+        var result = this.ExecuteObject(sql, new SqlParameter[]
+        {
+              new SqlParameter("@cursorName", cursorName)
+        }, (r) =>
+        {
+          return r["cursor_status"].GetInt32();
+        });
+
+        return result;
+
       }
-   }
+      catch (Exception e)
+      {
+        this.Dispose();
+        throw new Exception("Error in cursor", e);
+      }
+    }
+
+    public void Dispose()
+    {
+      _connection.Close();
+      _offset = 0;
+    }
+  }
 }
