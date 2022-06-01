@@ -13,6 +13,7 @@ namespace Ultranaco.Database.SQLServer.Service
     private SqlConnection _connection;
     private string _connectionString;
     public int _offset = 0;
+    private int _commmandTimeout = 0;
 
     // TODO: make services pool to handle multiples connections
     private static SqlService _sqlService;
@@ -22,8 +23,9 @@ namespace Ultranaco.Database.SQLServer.Service
       this.Connect(connectionString, isPrefixName);
     }
 
-    private void Connect(string connectionString, bool useConfigFile = true)
+    private void Connect(string connectionString, bool useConfigFile = true, int commandTimeout = 0)
     {
+      this._commmandTimeout = commandTimeout;
       if (useConfigFile)
         _connectionString = ConnectionStringParameter.Get(connectionString);
       else
@@ -57,6 +59,7 @@ namespace Ultranaco.Database.SQLServer.Service
 
       using (var command = new SqlCommand(sql, _connection))
       {
+        command.CommandTimeout = this._commmandTimeout;
         command.Parameters.AddRange(parameters.ToArray());
         using (IDataReader reader = command.ExecuteReader())
         {
@@ -82,6 +85,7 @@ namespace Ultranaco.Database.SQLServer.Service
       int result;
       using (var command = new SqlCommand(sql, _connection))
       {
+        command.CommandTimeout = this._commmandTimeout;
         command.Parameters.AddRange(parameters.ToArray());
         result = command.ExecuteNonQuery();
         command.Parameters.Clear();
@@ -95,6 +99,7 @@ namespace Ultranaco.Database.SQLServer.Service
       object result;
       using (var command = new SqlCommand(sql, _connection))
       {
+        command.CommandTimeout = this._commmandTimeout;
         command.Parameters.AddRange(parameters.ToArray());
         result = command.ExecuteScalar();
         command.Parameters.Clear();
