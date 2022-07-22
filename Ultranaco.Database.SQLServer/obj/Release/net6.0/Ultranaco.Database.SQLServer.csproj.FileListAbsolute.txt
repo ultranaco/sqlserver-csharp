@@ -1,0 +1,12 @@
+/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/obj/Release/net6.0/Ultranaco.Database.SQLServer.csproj.AssemblyReference.cache
+/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/obj/Release/net6.0/Ultranaco.Database.SQLServer.GeneratedMSBuildEditorConfig.editorconfig
+/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/obj/Release/net6.0/Ultranaco.Database.SQLServer.AssemblyInfoInputs.cache
+/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/obj/Release/net6.0/Ultranaco.Database.SQLServer.AssemblyInfo.cs
+/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/obj/Release/net6.0/Ultranaco.Database.SQLServer.csproj.CoreCompileInputs.cache
+/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/bin/Release/net6.0/Ultranaco.Database.SQLServer.deps.json
+/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/bin/Release/net6.0/Ultranaco.Database.SQLServer.dll
+/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/bin/Release/net6.0/Ultranaco.Database.SQLServer.pdb
+/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/obj/Release/net6.0/Ultranaco.Database.SQLServer.dll
+/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/obj/Release/net6.0/refint/Ultranaco.Database.SQLServer.dll
+/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/obj/Release/net6.0/Ultranaco.Database.SQLServer.pdb
+/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/obj/Release/net6.0/ref/Ultranaco.Database.SQLServer.dll
