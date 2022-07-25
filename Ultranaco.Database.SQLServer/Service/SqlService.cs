@@ -1,5 +1,4 @@
-﻿using Ultranaco.Appsettings;
-using Ultranaco.Objects;
+﻿using Ultranaco.Objects;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -8,27 +7,31 @@ using System.Linq;
 
 namespace Ultranaco.Database.SQLServer.Service
 {
-  public class SqlService : IDisposable
+  public partial class SqlService : IDisposable
   {
     public int _offset = 0;
+    public SqlConnection Connection { get; private set; }
 
-    public T ExecuteObject<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper, string connectionPoolKey)
+    public SqlService(SqlConnection connection)
     {
-      return ExecuteList(sql, parameters, mapper, connectionPoolKey).FirstOrDefault();
+      this.Connection = connection;
     }
 
-    public List<T> ExecuteList<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper, string connectionPoolKey)
+    public T ExecuteObject<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper)
     {
-      return ExecuteReader(sql, parameters, mapper, connectionPoolKey).ToList();
+      return ExecuteReader(sql, parameters, mapper, 0).FirstOrDefault();
     }
 
-    public IEnumerable<T> ExecuteReader<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper, string connectionPoolKey, int indexBreak = -1, int commmandTimeout = 0)
+    public List<T> ExecuteList<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper)
+    {
+      return ExecuteReader(sql, parameters, mapper).ToList();
+    }
+
+    public IEnumerable<T> ExecuteReader<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper, int indexBreak = -1, int commmandTimeout = 0)
     {
       List<T> result = new List<T>();
 
-      var connection = SqlConnectionPool.Get(connectionPoolKey);
-
-      using (var command = new SqlCommand(sql, connection))
+      using (var command = new SqlCommand(sql, this.Connection))
       {
         command.CommandTimeout = commmandTimeout;
         command.Parameters.AddRange(parameters.ToArray());
@@ -51,13 +54,11 @@ namespace Ultranaco.Database.SQLServer.Service
       return result;
     }
 
-    public int ExecuteNonQuery(string sql, IEnumerable<SqlParameter> parameters, string connectionPoolKey, int commmandTimeout = 0)
+    public int ExecuteNonQuery(string sql, IEnumerable<SqlParameter> parameters, int commmandTimeout = 0)
     {
       int result;
 
-      var connection = SqlConnectionPool.Get(connectionPoolKey);
-
-      using (var command = new SqlCommand(sql, connection))
+      using (var command = new SqlCommand(sql, this.Connection))
       {
         command.CommandTimeout = commmandTimeout;
         command.Parameters.AddRange(parameters.ToArray());
@@ -68,11 +69,11 @@ namespace Ultranaco.Database.SQLServer.Service
       return result;
     }
 
-    public object ExecuteScalar(string sql, IEnumerable<SqlParameter> parameters, string connectionPoolKey, int commmandTimeout = 0)
+    public object ExecuteScalar(string sql, IEnumerable<SqlParameter> parameters, int commmandTimeout = 0)
     {
       object result;
-      var connection = SqlConnectionPool.Get(connectionPoolKey);
-      using (var command = new SqlCommand(sql, connection))
+
+      using (var command = new SqlCommand(sql, this.Connection))
       {
         command.CommandTimeout = commmandTimeout;
         command.Parameters.AddRange(parameters.ToArray());
@@ -84,19 +85,19 @@ namespace Ultranaco.Database.SQLServer.Service
       return result;
     }
 
-    public T Scroll<T>(string sql, IEnumerable<SqlParameter> @params, string orderBy, Func<IDataReader, T> rowMapper, string connectionPoolKey)
+    public T Scroll<T>(string sql, IEnumerable<SqlParameter> @params, string orderBy, Func<IDataReader, T> rowMapper)
     {
-
       sql = String.Format(@"
-SELECT  * FROM (
-{0}
+SELECT  * FROM 
+(
+  {0}
 ) rowSet
 ORDER BY {1} 
 OFFSET {2} ROWS FETCH NEXT 1 ROWS ONLY
 ", sql, orderBy, _offset).Replace(";", "");
       try
       {
-        var result = ExecuteObject(sql, @params, rowMapper, connectionPoolKey);
+        var result = this.ExecuteObject(sql, @params, rowMapper);
         _offset++;
         return result;
       }
@@ -118,7 +119,7 @@ OFFSET {2} ROWS FETCH NEXT 1 ROWS ONLY
     /// <param name="rowMapper"></param>
     /// <param name="timeOut"></param>
     /// <returns></returns>
-    public T ScrollForward<T>(string sql, IEnumerable<SqlParameter> @params, string cursorName, Func<IDataReader, T> rowMapper, string connectionPoolKey)
+    public T ScrollForward<T>(string sql, IEnumerable<SqlParameter> @params, string cursorName, Func<IDataReader, T> rowMapper)
     {
       sql = String.Format(@"
 DECLARE @cur_status int;
@@ -151,7 +152,7 @@ ELSE
 ", sql, cursorName);
       try
       {
-        return ExecuteObject(sql, @params, rowMapper, connectionPoolKey);
+        return ExecuteObject(sql, @params, rowMapper);
       }
       catch (Exception e)
       {
@@ -167,7 +168,7 @@ ELSE
     /// <param name="db"></param>
     /// <param name="timeOut"></param>
     /// <returns></returns>
-    public int CloseScroll(string cursorName, string connectionPoolKey)
+    public int CloseScroll(string cursorName)
     {
       var sql = String.Format(@"
 DECLARE @cur_status int;
@@ -186,13 +187,13 @@ SELECT @cur_status cursor_status;
 ", cursorName);
       try
       {
-        var result = ExecuteObject(sql, new SqlParameter[]
+        var result = this.ExecuteObject(sql, new SqlParameter[]
         {
               new SqlParameter("@cursorName", cursorName)
         }, (r) =>
         {
           return r["cursor_status"].GetInt32();
-        }, connectionPoolKey);
+        });
 
         return result;
 
@@ -206,7 +207,7 @@ SELECT @cur_status cursor_status;
 
     public void Dispose()
     {
-      _offset = 0;
+      this._offset = 0;
     }
   }
 }

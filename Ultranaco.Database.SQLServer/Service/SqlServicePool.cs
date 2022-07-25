@@ -6,25 +6,27 @@ using Ultranaco.Appsettings;
 
 namespace Ultranaco.Database.SQLServer.Service;
 
-public class SqlConnectionPool
+public class SqlServicePool
 {
-  private static ConcurrentDictionary<string, SqlConnection> _connections = new ConcurrentDictionary<string, SqlConnection>();
+  private static ConcurrentDictionary<string, SqlService> _connections = new ConcurrentDictionary<string, SqlService>();
 
-  public SqlConnectionPool(string key, string connectionString = null, bool useAppSettingsFile = true)
+  public SqlServicePool(string key, string connectionString = null, bool useAppSettingsFile = true)
   {
-    Set(key, connectionString, useAppSettingsFile);
+    Set(key, null, connectionString, useAppSettingsFile);
   }
 
-  public static SqlConnection Get(string key)
+  public static SqlService Get(string key)
   {
-    SqlConnection connection;
+    SqlService service;
 
-    var wasObtained = _connections.TryGetValue(key, out connection);
+    var wasObtained = _connections.TryGetValue(key, out service);
 
     if (!wasObtained)
     {
       throw new Exception("SqlConnection: an error ocurred or not found a connection while trying to retrieve it from collection");
     }
+
+    var connection = service.Connection;
 
     if (connection.State != ConnectionState.Open)
     {
@@ -35,10 +37,10 @@ public class SqlConnectionPool
       }
     }
 
-    return connection;
+    return service;
   }
 
-  public static SqlConnection Set(string key, string connectionString = null, bool useAppSettingsFile = true)
+  public static SqlConnection Set(string key, Action<object, SqlInfoMessageEventArgs> messageHandler = null, string connectionString = null, bool useAppSettingsFile = true)
   {
     if (useAppSettingsFile && connectionString == null)
     {
@@ -50,7 +52,9 @@ public class SqlConnectionPool
     }
 
     var connection = new SqlConnection(connectionString);
-    var isAdded = _connections.TryAdd(key, connection);
+    var sqlService = new SqlService(connection);
+
+    var isAdded = _connections.TryAdd(key, sqlService);
 
     if (!isAdded)
     {
@@ -58,6 +62,16 @@ public class SqlConnectionPool
     }
 
     connection.Open();
+
+    if (messageHandler != null)
+    {
+      // connection.StatisticsEnabled = true;
+      connection.InfoMessage += (sender, @event) =>
+      {
+        messageHandler(sender, @event);
+      };
+    }
+
 
     return connection;
   }

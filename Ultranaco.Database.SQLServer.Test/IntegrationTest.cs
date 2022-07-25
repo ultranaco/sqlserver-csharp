@@ -12,8 +12,6 @@ namespace Ultranaco.Database.SQLServer.Test;
 
 public class IntegrationTest
 {
-  private SqlService _sql;
-
   public IntegrationTest()
   {
     IConfiguration configuration = new ConfigurationBuilder()
@@ -22,10 +20,13 @@ public class IntegrationTest
    .Build()
    .AttachConnectionString();
 
-    var connection = SqlConnectionPool.Set("MasterPool");
-    TestContext.Progress.WriteLine($@"connection state: {connection.State}");
+    var connection = SqlServicePool.Set("MasterPool", (sender, @event) =>
+    {
+      TestContext.Progress.WriteLine($@"SQL Message Info:
+      {@event.Message.ToString()}");
+    });
 
-    this._sql = new SqlService();
+    TestContext.Progress.WriteLine($@"IntegrationTest: connection state: {connection.State}");
   }
 
   [SetUp]
@@ -36,6 +37,7 @@ public class IntegrationTest
   [Test, Order(1)]
   public void CreateUltranacoDatabase()
   {
+    TestContext.Progress.WriteLine("CreateUltranacoDatabase: starting at {0}", DateTime.Now);
     var parameters = new List<SqlParameter>();
     var query = @"
     IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'UltranacoLabs')
@@ -43,18 +45,27 @@ public class IntegrationTest
       CREATE DATABASE [UltranacoLabs]
       COLLATE Latin1_General_CI_AS;
       ALTER DATABASE [UltranacoLabs] SET  DISABLE_BROKER;
+      PRINT 'UltranacoLabs was created succesfully';
+    END
+    ELSE
+    BEGIN
+      PRINT 'UltranacoLabs database already exists';
     END
 ";
-    var rowAffected = this._sql.ExecuteNonQuery(query, parameters, "MasterPool");
-
-    TestContext.Progress.WriteLine("Rows affected {0}", rowAffected);
+    SqlService.ExecuteNonQuery(query, parameters, "MasterPool");
     Assert.Pass();
   }
 
   [Test, Order(2)]
   public void EstablishConnectionToUltranacoDB()
   {
-    var connection = SqlConnectionPool.Set("UltranacoPool");
+    TestContext.Progress.WriteLine("EstablishConnectionToUltranacoDB: starting at {0}", DateTime.Now);
+    var connection = SqlServicePool.Set("UltranacoPool", (sender, @event) =>
+    {
+      TestContext.Progress.WriteLine($@"SQL Message Info:
+      {@event.Message.ToString()}");
+    });
+
     TestContext.Progress.WriteLine($@"connection state: {connection.State}");
     Assert.Pass();
   }
@@ -62,6 +73,7 @@ public class IntegrationTest
   [Test, Order(3)]
   public void CreateDummyTable()
   {
+    TestContext.Progress.WriteLine("CreateDummyTable: starting at {0}", DateTime.Now);
     // INFO: uncomment for debug porpouse
     // SqlConnectionPool.Set("UltranacoPool");
 
@@ -85,15 +97,14 @@ public class IntegrationTest
       price float
     );
 ";
-    var rowAffected = this._sql.ExecuteNonQuery(query, parameters, "UltranacoPool");
-
-    TestContext.Progress.WriteLine("Rows affected {0}", rowAffected);
+    SqlService.ExecuteNonQuery(query, parameters, "UltranacoPool");
     Assert.Pass();
   }
 
   [Test, Order(4)]
   public void InsertAndDynamicParametersTest()
   {
+    TestContext.Progress.WriteLine("InsertAndDynamicParametersTest: starting at {0}", DateTime.Now);
     var parameters = new List<SqlParameter>();
 
     parameters.Add("name", "name_1");
@@ -106,7 +117,7 @@ public class IntegrationTest
 
     for (var index = 0; index < 100; index++)
     {
-      this._sql.ExecuteNonQuery(query, parameters, "UltranacoPool");
+      SqlService.ExecuteNonQuery(query, parameters, "UltranacoPool");
       parameters[0].Value = "name_" + index;
       parameters[1].Value = "code_" + index;
       parameters[2].Value = 1.4 + index;
@@ -118,10 +129,11 @@ public class IntegrationTest
   [Test, Order(5)]
   public void ExecuteScalarTest()
   {
+    TestContext.Progress.WriteLine("ExecuteScalarTest: starting at {0}", DateTime.Now);
     var parameters = new List<SqlParameter>();
     var query = "SELECT COUNT(id) totalProducts FROM Products";
 
-    int count = (int)this._sql.ExecuteScalar(query, parameters, "UltranacoPool");
+    int count = (int)SqlService.ExecuteScalar(query, parameters, "UltranacoPool");
 
     Assert.AreEqual(100, count);
   }
