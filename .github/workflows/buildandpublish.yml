@@ -14,7 +14,7 @@ jobs:
     environment: production
 
     services:
-      sql.data:
+      sql.server:
         image: mcr.microsoft.com/mssql/server:2019-latest
         env:
           SA_PASSWORD: UltranacoLabs.1
