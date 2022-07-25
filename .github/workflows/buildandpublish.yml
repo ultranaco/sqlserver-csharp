@@ -24,6 +24,9 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build -c Release --no-restore
+      - name: Mount SQL Server container
+        run: |
+          docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=UltranacoLabs.1" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-latest
       - name: Test
         run: dotnet test -c Release --no-build --verbosity normal
       - name: Pack
