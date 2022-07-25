@@ -13,6 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
 
+    services:
+      localhost:
+        ports: 0:65535
+
     steps:
       - uses: actions/checkout@v3
       - name: Setup .NET
