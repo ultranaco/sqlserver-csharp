@@ -3762,7 +3762,7 @@
     "/home/alex/.nuget/packages/": {}
   },
   "project": {
-    "version": "0.1.0",
+    "version": "0.1.1",
     "restore": {
       "projectUniqueName": "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer/Ultranaco.Database.SQLServer.csproj",
       "projectName": "Ultranaco.Database.SQLServer",

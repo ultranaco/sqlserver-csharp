@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "5hwRyhfF+Orw7rtBsTLJGfQDaNzScE5kEWvUcwup8DKeyg8WIoaIp7AQ1vHXZ8PBUnNFl+z3uF4cTZGcnUwt1g==",
+  "dgSpecHash": "L1nJ3mkKt4Zb21LV1Fnb/0IbLf5OqvI9iBg+yj3905Mdtaao/+cOZltRiUKSBoSful8dfyGeKlV5noXa5xlOLw==",
   "success": true,
   "projectFilePath": "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer.Test/Ultranaco.Database.SQLServer.Test.csproj",
   "expectedPackageFiles": [
