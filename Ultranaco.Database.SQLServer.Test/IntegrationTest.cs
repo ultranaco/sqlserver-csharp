@@ -6,6 +6,7 @@ using System.IO;
 using Ultranaco.Appsettings;
 using System.Data.SqlClient;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Ultranaco.Database.SQLServer.Test;
 
@@ -22,7 +23,7 @@ public class IntegrationTest
    .AttachConnectionString();
 
     var connection = SqlConnectionPool.Set("MasterPool");
-    Console.WriteLine($@"connection state: {connection.State}");
+    TestContext.Progress.WriteLine($@"connection state: {connection.State}");
 
     this._sql = new SqlService();
   }
@@ -46,7 +47,7 @@ public class IntegrationTest
 ";
     var rowAffected = this._sql.ExecuteNonQuery(query, parameters, "MasterPool");
 
-    Console.WriteLine("Rows affected {0}", rowAffected);
+    TestContext.Progress.WriteLine("Rows affected {0}", rowAffected);
     Assert.Pass();
   }
 
@@ -54,7 +55,7 @@ public class IntegrationTest
   public void EstablishConnectionToUltranacoDB()
   {
     var connection = SqlConnectionPool.Set("UltranacoPool");
-    Console.WriteLine($@"connection state: {connection.State}");
+    TestContext.Progress.WriteLine($@"connection state: {connection.State}");
     Assert.Pass();
   }
 
@@ -84,7 +85,7 @@ public class IntegrationTest
 ";
     var rowAffected = this._sql.ExecuteNonQuery(query, parameters, "UltranacoPool");
 
-    Console.WriteLine("Rows affected {0}", rowAffected);
+    TestContext.Progress.WriteLine("Rows affected {0}", rowAffected);
     Assert.Pass();
   }
 
