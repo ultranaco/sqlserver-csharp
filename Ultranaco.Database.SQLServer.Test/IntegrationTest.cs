@@ -67,21 +67,23 @@ public class IntegrationTest
 
     var parameters = new List<SqlParameter>();
     var query = @"
-    IF NOT EXISTS 
+    IF EXISTS 
     (
       SELECT TABLE_NAME 
       FROM INFORMATION_SCHEMA.TABLES 
       WHERE TABLE_NAME = 'Products'
     )
     BEGIN
-      CREATE TABLE Products
-      (
-        id int IDENTITY(1,1) PRIMARY KEY,
-        name varchar(255) NOT NULL,
-        code varchar(255) NOT NULL,
-        price float
-      );
+      DROP TABLE Products
     END
+    
+    CREATE TABLE Products
+    (
+      id int IDENTITY(1,1) PRIMARY KEY,
+      name varchar(255) NOT NULL,
+      code varchar(255) NOT NULL,
+      price float
+    );
 ";
     var rowAffected = this._sql.ExecuteNonQuery(query, parameters, "UltranacoPool");
 
