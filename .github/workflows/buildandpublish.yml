@@ -14,8 +14,8 @@ jobs:
     environment: production
 
     services:
-      localhost:
-        - ports: 80:65535
+      sqlserver:
+        - ports: 1433:1433
 
     steps:
       - uses: actions/checkout@v3
