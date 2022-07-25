@@ -25,7 +25,11 @@
         "frameworks": {
           "net6.0": {
             "targetAlias": "net6.0",
-            "projectReferences": {}
+            "projectReferences": {
+              "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer/Ultranaco.Database.SQLServer.csproj": {
+                "projectPath": "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer/Ultranaco.Database.SQLServer.csproj"
+              }
+            }
           }
         },
         "warningProperties": {
@@ -53,6 +57,88 @@
             "coverlet.collector": {
               "target": "Package",
               "version": "[3.1.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/home/alex/.dotnet/sdk/6.0.300/RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer/Ultranaco.Database.SQLServer.csproj": {
+      "version": "0.1.0",
+      "restore": {
+        "projectUniqueName": "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer/Ultranaco.Database.SQLServer.csproj",
+        "projectName": "Ultranaco.Database.SQLServer",
+        "projectPath": "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer/Ultranaco.Database.SQLServer.csproj",
+        "packagesPath": "/home/alex/.nuget/packages/",
+        "outputPath": "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/alex/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "Microsoft.SqlServer.Types": {
+              "target": "Package",
+              "version": "[14.0.1016.290, )"
+            },
+            "NetTopologySuite": {
+              "target": "Package",
+              "version": "[2.4.0, )"
+            },
+            "NetTopologySuite.IO.GeoJSON": {
+              "target": "Package",
+              "version": "[2.0.4, )"
+            },
+            "NetTopologySuite.IO.SqlServerBytes": {
+              "target": "Package",
+              "version": "[2.1.0, )"
+            },
+            "System.Data.SqlClient": {
+              "target": "Package",
+              "version": "[4.8.3, )"
+            },
+            "Ultranaco.Appsettings": {
+              "target": "Package",
+              "version": "[0.0.7, )"
+            },
+            "Ultranaco.Objects": {
+              "target": "Package",
+              "version": "[0.0.4, )"
             }
           },
           "imports": [

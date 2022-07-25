@@ -14,4 +14,14 @@
     <PackageReference Include="coverlet.collector" Version="3.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Ultranaco.Database.SQLServer\Ultranaco.Database.SQLServer.csproj" />
+  </ItemGroup>
+
+   <!-- <ItemGroup>
+      <None Include="appSettings*.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+   </ItemGroup> -->
+
 </Project>

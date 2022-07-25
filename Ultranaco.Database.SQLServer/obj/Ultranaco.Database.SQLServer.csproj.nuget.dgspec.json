@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer.csproj": {}
+    "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer/Ultranaco.Database.SQLServer.csproj": {}
   },
   "projects": {
-    "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer.csproj": {
-      "version": "0.0.6",
+    "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer/Ultranaco.Database.SQLServer.csproj": {
+      "version": "0.1.0",
       "restore": {
-        "projectUniqueName": "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer.csproj",
+        "projectUniqueName": "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer/Ultranaco.Database.SQLServer.csproj",
         "projectName": "Ultranaco.Database.SQLServer",
-        "projectPath": "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer.csproj",
+        "projectPath": "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer/Ultranaco.Database.SQLServer.csproj",
         "packagesPath": "/home/alex/.nuget/packages/",
-        "outputPath": "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/obj/",
+        "outputPath": "/home/alex/dev/dotnet/ultranaco/sqlserver-csharp/Ultranaco.Database.SQLServer/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/alex/.nuget/NuGet/NuGet.Config"
@@ -60,7 +60,7 @@
             },
             "Ultranaco.Appsettings": {
               "target": "Package",
-              "version": "[0.0.4, )"
+              "version": "[0.0.7, )"
             },
             "Ultranaco.Objects": {
               "target": "Package",

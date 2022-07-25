@@ -12,21 +12,21 @@ namespace Ultranaco.Database.SQLServer.Service
   {
     public int _offset = 0;
 
-    public T ExecuteObject<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper, string connectionString)
+    public T ExecuteObject<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper, string connectionPoolKey)
     {
-      return ExecuteList(sql, parameters, mapper, connectionString).FirstOrDefault();
+      return ExecuteList(sql, parameters, mapper, connectionPoolKey).FirstOrDefault();
     }
 
-    public List<T> ExecuteList<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper, string connectionString)
+    public List<T> ExecuteList<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper, string connectionPoolKey)
     {
-      return ExecuteReader(sql, parameters, mapper, connectionString).ToList();
+      return ExecuteReader(sql, parameters, mapper, connectionPoolKey).ToList();
     }
 
-    public IEnumerable<T> ExecuteReader<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper, string connectionString, int indexBreak = -1, int commmandTimeout = 0)
+    public IEnumerable<T> ExecuteReader<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper, string connectionPoolKey, int indexBreak = -1, int commmandTimeout = 0)
     {
       List<T> result = new List<T>();
 
-      var connection = SqlConnectionPool.Get(connectionString);
+      var connection = SqlConnectionPool.Get(connectionPoolKey);
 
       using (var command = new SqlCommand(sql, connection))
       {
@@ -51,11 +51,11 @@ namespace Ultranaco.Database.SQLServer.Service
       return result;
     }
 
-    public int ExecuteNonQuery(string sql, IEnumerable<SqlParameter> parameters, string connectionString, int commmandTimeout = 0)
+    public int ExecuteNonQuery(string sql, IEnumerable<SqlParameter> parameters, string connectionPoolKey, int commmandTimeout = 0)
     {
       int result;
 
-      var connection = SqlConnectionPool.Get(connectionString);
+      var connection = SqlConnectionPool.Get(connectionPoolKey);
 
       using (var command = new SqlCommand(sql, connection))
       {
@@ -68,10 +68,10 @@ namespace Ultranaco.Database.SQLServer.Service
       return result;
     }
 
-    public object ExecuteScalar(string sql, IEnumerable<SqlParameter> parameters, string connectionString, int commmandTimeout = 0)
+    public object ExecuteScalar(string sql, IEnumerable<SqlParameter> parameters, string connectionPoolKey, int commmandTimeout = 0)
     {
       object result;
-      var connection = SqlConnectionPool.Get(connectionString);
+      var connection = SqlConnectionPool.Get(connectionPoolKey);
       using (var command = new SqlCommand(sql, connection))
       {
         command.CommandTimeout = commmandTimeout;
@@ -84,7 +84,7 @@ namespace Ultranaco.Database.SQLServer.Service
       return result;
     }
 
-    public T Scroll<T>(string sql, IEnumerable<SqlParameter> @params, string orderBy, Func<IDataReader, T> rowMapper, string connectionString)
+    public T Scroll<T>(string sql, IEnumerable<SqlParameter> @params, string orderBy, Func<IDataReader, T> rowMapper, string connectionPoolKey)
     {
 
       sql = String.Format(@"
@@ -96,7 +96,7 @@ OFFSET {2} ROWS FETCH NEXT 1 ROWS ONLY
 ", sql, orderBy, _offset).Replace(";", "");
       try
       {
-        var result = ExecuteObject(sql, @params, rowMapper, connectionString);
+        var result = ExecuteObject(sql, @params, rowMapper, connectionPoolKey);
         _offset++;
         return result;
       }
@@ -118,7 +118,7 @@ OFFSET {2} ROWS FETCH NEXT 1 ROWS ONLY
     /// <param name="rowMapper"></param>
     /// <param name="timeOut"></param>
     /// <returns></returns>
-    public T ScrollForward<T>(string sql, IEnumerable<SqlParameter> @params, string cursorName, Func<IDataReader, T> rowMapper, string connectionString)
+    public T ScrollForward<T>(string sql, IEnumerable<SqlParameter> @params, string cursorName, Func<IDataReader, T> rowMapper, string connectionPoolKey)
     {
       sql = String.Format(@"
 DECLARE @cur_status int;
@@ -151,7 +151,7 @@ ELSE
 ", sql, cursorName);
       try
       {
-        return ExecuteObject(sql, @params, rowMapper, connectionString);
+        return ExecuteObject(sql, @params, rowMapper, connectionPoolKey);
       }
       catch (Exception e)
       {
@@ -167,7 +167,7 @@ ELSE
     /// <param name="db"></param>
     /// <param name="timeOut"></param>
     /// <returns></returns>
-    public int CloseScroll(string cursorName, string connectionString)
+    public int CloseScroll(string cursorName, string connectionPoolKey)
     {
       var sql = String.Format(@"
 DECLARE @cur_status int;
@@ -192,7 +192,7 @@ SELECT @cur_status cursor_status;
         }, (r) =>
         {
           return r["cursor_status"].GetInt32();
-        }, connectionString);
+        }, connectionPoolKey);
 
         return result;
 

@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Threading;
 using Ultranaco.Appsettings;
 
 namespace Ultranaco.Database.SQLServer.Service;
@@ -11,6 +9,11 @@ namespace Ultranaco.Database.SQLServer.Service;
 public class SqlConnectionPool
 {
   private static ConcurrentDictionary<string, SqlConnection> _connections = new ConcurrentDictionary<string, SqlConnection>();
+
+  public SqlConnectionPool(string key, string connectionString = null, bool useAppSettingsFile = true)
+  {
+    Set(key, connectionString, useAppSettingsFile);
+  }
 
   public static SqlConnection Get(string key)
   {
@@ -35,11 +38,15 @@ public class SqlConnectionPool
     return connection;
   }
 
-  public static SqlConnection Set(string key, string connectionString, bool useAppSettingsFile = true)
+  public static SqlConnection Set(string key, string connectionString = null, bool useAppSettingsFile = true)
   {
-    if (useAppSettingsFile)
+    if (useAppSettingsFile && connectionString == null)
     {
-      connectionString = ConnectionStringParameter.Get(connectionString);
+      connectionString = ConnectionStringParameter.Get(key);
+    }
+    else if (connectionString == null)
+    {
+      throw new Exception("SqlConnectionPool: connnection string is not set");
     }
 
     var connection = new SqlConnection(connectionString);
