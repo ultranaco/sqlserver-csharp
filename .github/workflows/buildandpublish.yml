@@ -13,10 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
 
-    services:
-      sqlserver:
-        - ports: 1433:1433
-
     steps:
       - uses: actions/checkout@v3
       - name: Setup .NET
