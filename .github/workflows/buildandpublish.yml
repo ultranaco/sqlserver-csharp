@@ -15,7 +15,7 @@ jobs:
 
     services:
       localhost:
-        ports: 0:65535
+        - ports: 80:65535
 
     steps:
       - uses: actions/checkout@v3
