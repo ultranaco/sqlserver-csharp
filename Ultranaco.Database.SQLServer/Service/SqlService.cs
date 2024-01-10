@@ -17,17 +17,17 @@ namespace Ultranaco.Database.SQLServer.Service
       this.ConnectionString = connectionString;
     }
 
-    public T ExecuteObject<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper)
+    public T ExecuteObject<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper, bool isStoreProcedure = false)
     {
-      return ExecuteReader(sql, parameters, mapper, 0).FirstOrDefault();
+      return ExecuteReader(sql, parameters, mapper, isStoreProcedure, 0).FirstOrDefault();
     }
 
-    public List<T> ExecuteList<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper)
+    public List<T> ExecuteList<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper, bool isStoreProcedure = false)
     {
-      return ExecuteReader(sql, parameters, mapper).ToList();
+      return ExecuteReader(sql, parameters, mapper, isStoreProcedure).ToList();
     }
 
-    public IEnumerable<T> ExecuteReader<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper, int indexBreak = -1, int commmandTimeout = 0)
+    public IEnumerable<T> ExecuteReader<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper, bool isStoreProcedure = false, int indexBreak = -1, int commmandTimeout = 0)
     {
       List<T> result = new List<T>();
 
@@ -36,6 +36,9 @@ namespace Ultranaco.Database.SQLServer.Service
         connection.Open();
         using (var command = new SqlCommand(sql, connection))
         {
+          if (isStoreProcedure)
+            command.CommandType = CommandType.StoredProcedure;
+            
           command.CommandTimeout = commmandTimeout;
           command.Parameters.AddRange(parameters.ToArray());
           using (IDataReader reader = command.ExecuteReader())
@@ -59,7 +62,7 @@ namespace Ultranaco.Database.SQLServer.Service
       return result;
     }
 
-    public int ExecuteNonQuery(string sql, IEnumerable<SqlParameter> parameters, int commmandTimeout = 0)
+    public int ExecuteNonQuery(string sql, IEnumerable<SqlParameter> parameters, bool isStoreProcedure = false, int commmandTimeout = 0)
     {
       int result;
 
@@ -68,6 +71,9 @@ namespace Ultranaco.Database.SQLServer.Service
         connection.Open();
         using (var command = new SqlCommand(sql, connection))
         {
+          if (isStoreProcedure)
+            command.CommandType = CommandType.StoredProcedure;
+
           command.CommandTimeout = commmandTimeout;
           command.Parameters.AddRange(parameters.ToArray());
           result = command.ExecuteNonQuery();
@@ -80,7 +86,7 @@ namespace Ultranaco.Database.SQLServer.Service
       return result;
     }
 
-    public object ExecuteScalar(string sql, IEnumerable<SqlParameter> parameters, int commmandTimeout = 0)
+    public object ExecuteScalar(string sql, IEnumerable<SqlParameter> parameters, bool isStoreProcedure = false, int commmandTimeout = 0)
     {
       object result;
 
@@ -89,6 +95,9 @@ namespace Ultranaco.Database.SQLServer.Service
         connection.Open();
         using (var command = new SqlCommand(sql, connection))
         {
+          if (isStoreProcedure)
+            command.CommandType = CommandType.StoredProcedure;
+
           command.CommandTimeout = commmandTimeout;
           command.Parameters.AddRange(parameters.ToArray());
           result = command.ExecuteScalar();
