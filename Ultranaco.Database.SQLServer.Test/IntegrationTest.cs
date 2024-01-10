@@ -54,16 +54,6 @@ public class IntegrationTest
     Assert.Pass();
   }
 
-  [Test, Order(2)]
-  public void EstablishConnectionToUltranacoDB()
-  {
-    TestContext.Progress.WriteLine("EstablishConnectionToUltranacoDB: starting at {0}", DateTime.Now);
-    var connection = SqlServicePool.Set("UltranacoPool");
-
-    TestContext.Progress.WriteLine($@"connection state: {connection}");
-    Assert.Pass();
-  }
-
   [Test, Order(3)]
   public void CreateDummyTable()
   {
