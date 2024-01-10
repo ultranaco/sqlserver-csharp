@@ -38,6 +38,8 @@ public class SqlServicePool
       throw new Exception("SqlConnectionPool: connnection string is not set");
     }
 
+    Console.WriteLine(string.Format("ConnectionString to Service: {0}", connectionString));
+
     var sqlService = new SqlService(connectionString);
 
     var isAdded = _connections.TryAdd(key, sqlService);
