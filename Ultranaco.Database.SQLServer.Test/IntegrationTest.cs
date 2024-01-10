@@ -12,8 +12,8 @@ namespace Ultranaco.Database.SQLServer.Test;
 
 public class IntegrationTest
 {
-  [SetUp]
-  public void Setup()
+
+  public IntegrationTest()
   {
     IConfiguration configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory() + "/../../..")
@@ -27,7 +27,8 @@ public class IntegrationTest
     SqlServicePool.Set("MasterPool");
   }
 
-  public IntegrationTest()
+  [SetUp]
+  public void Setup()
   {
   }
 
