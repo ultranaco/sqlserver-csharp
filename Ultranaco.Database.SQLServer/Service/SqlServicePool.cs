@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Data;
-using System.Data.SqlClient;
 using Ultranaco.Appsettings;
 
 namespace Ultranaco.Database.SQLServer.Service;
@@ -12,7 +10,7 @@ public class SqlServicePool
 
   public SqlServicePool(string key, string connectionString = null, bool useAppSettingsFile = true)
   {
-    Set(key, null, connectionString, useAppSettingsFile);
+    SqlServicePool.Set(key, connectionString, useAppSettingsFile);
   }
 
   public static SqlService Get(string key)
@@ -26,21 +24,10 @@ public class SqlServicePool
       throw new Exception("SqlConnection: an error ocurred or not found a connection while trying to retrieve it from collection");
     }
 
-    var connection = service.Connection;
-
-    if (connection.State != ConnectionState.Open)
-    {
-      if (connection.State == ConnectionState.Closed
-      || connection.State == ConnectionState.Broken)
-      {
-        connection.Open();
-      }
-    }
-
     return service;
   }
 
-  public static SqlConnection Set(string key, Action<object, SqlInfoMessageEventArgs> messageHandler = null, string connectionString = null, bool useAppSettingsFile = true)
+  public static string Set(string key, string connectionString = null, bool useAppSettingsFile = true)
   {
     if (useAppSettingsFile && connectionString == null)
     {
@@ -51,8 +38,7 @@ public class SqlServicePool
       throw new Exception("SqlConnectionPool: connnection string is not set");
     }
 
-    var connection = new SqlConnection(connectionString);
-    var sqlService = new SqlService(connection);
+    var sqlService = new SqlService(connectionString);
 
     var isAdded = _connections.TryAdd(key, sqlService);
 
@@ -61,18 +47,6 @@ public class SqlServicePool
       throw new Exception("an error ocurred while adding a connection to collection");
     }
 
-    connection.Open();
-
-    if (messageHandler != null)
-    {
-      // connection.StatisticsEnabled = true;
-      connection.InfoMessage += (sender, @event) =>
-      {
-        messageHandler(sender, @event);
-      };
-    }
-
-
-    return connection;
+    return connectionString;
   }
 }

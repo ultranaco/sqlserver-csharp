@@ -10,11 +10,11 @@ namespace Ultranaco.Database.SQLServer.Service
   public partial class SqlService : IDisposable
   {
     public int _offset = 0;
-    public SqlConnection Connection { get; private set; }
+    public string ConnectionString { get; private set; }
 
-    public SqlService(SqlConnection connection)
+    public SqlService(string connectionString)
     {
-      this.Connection = connection;
+      this.ConnectionString = connectionString;
     }
 
     public T ExecuteObject<T>(string sql, IEnumerable<SqlParameter> parameters, Func<IDataReader, T> mapper)
@@ -31,23 +31,26 @@ namespace Ultranaco.Database.SQLServer.Service
     {
       List<T> result = new List<T>();
 
-      using (var command = new SqlCommand(sql, this.Connection))
+      using(var connection = new SqlConnection(this.ConnectionString))
       {
-        command.CommandTimeout = commmandTimeout;
-        command.Parameters.AddRange(parameters.ToArray());
-        using (IDataReader reader = command.ExecuteReader())
+        using (var command = new SqlCommand(sql, connection))
         {
-          var index = 0;
-          while (reader.Read())
+          command.CommandTimeout = commmandTimeout;
+          command.Parameters.AddRange(parameters.ToArray());
+          using (IDataReader reader = command.ExecuteReader())
           {
-            result.Add(mapper(reader));
-            if (indexBreak > -1 && indexBreak == index)
-              break;
-            index++;
-          }
+            var index = 0;
+            while (reader.Read())
+            {
+              result.Add(mapper(reader));
+              if (indexBreak > -1 && indexBreak == index)
+                break;
+              index++;
+            }
 
-          command.Parameters.Clear();
-          parameters = new List<SqlParameter>();
+            command.Parameters.Clear();
+            parameters = new List<SqlParameter>();
+          }
         }
       }
 
@@ -58,14 +61,18 @@ namespace Ultranaco.Database.SQLServer.Service
     {
       int result;
 
-      using (var command = new SqlCommand(sql, this.Connection))
+      using(var connection = new SqlConnection(this.ConnectionString))
       {
-        command.CommandTimeout = commmandTimeout;
-        command.Parameters.AddRange(parameters.ToArray());
-        result = command.ExecuteNonQuery();
-        command.Parameters.Clear();
-        parameters = new List<SqlParameter>();
+        using (var command = new SqlCommand(sql, connection))
+        {
+          command.CommandTimeout = commmandTimeout;
+          command.Parameters.AddRange(parameters.ToArray());
+          result = command.ExecuteNonQuery();
+          command.Parameters.Clear();
+          parameters = new List<SqlParameter>();
+        }
       }
+
       return result;
     }
 
@@ -73,13 +80,16 @@ namespace Ultranaco.Database.SQLServer.Service
     {
       object result;
 
-      using (var command = new SqlCommand(sql, this.Connection))
+      using (var connection = new SqlConnection(this.ConnectionString))
       {
-        command.CommandTimeout = commmandTimeout;
-        command.Parameters.AddRange(parameters.ToArray());
-        result = command.ExecuteScalar();
-        command.Parameters.Clear();
-        parameters = new List<SqlParameter>();
+        using (var command = new SqlCommand(sql, connection))
+        {
+          command.CommandTimeout = commmandTimeout;
+          command.Parameters.AddRange(parameters.ToArray());
+          result = command.ExecuteScalar();
+          command.Parameters.Clear();
+          parameters = new List<SqlParameter>();
+        }
       }
 
       return result;

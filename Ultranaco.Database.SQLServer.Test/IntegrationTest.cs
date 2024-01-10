@@ -18,15 +18,13 @@ public class IntegrationTest
    .SetBasePath(Directory.GetCurrentDirectory() + "/../../..")
    .AddJsonFile("appSettings.json")
    .Build()
+   .AttachApplicationKeys()
    .AttachConnectionString();
 
-    var connection = SqlServicePool.Set("MasterPool", (sender, @event) =>
-    {
-      TestContext.Progress.WriteLine($@"SQL Message Info:
-      {@event.Message.ToString()}");
-    });
+    var connection = SqlServicePool.Set("MasterPool");
 
-    TestContext.Progress.WriteLine($@"IntegrationTest: connection state: {connection.State}");
+    // TODO: remove or refactor this test, it doesn't do nothing
+    TestContext.Progress.WriteLine($@"IntegrationTest: connection string: {connection}");
   }
 
   [SetUp]
@@ -60,13 +58,9 @@ public class IntegrationTest
   public void EstablishConnectionToUltranacoDB()
   {
     TestContext.Progress.WriteLine("EstablishConnectionToUltranacoDB: starting at {0}", DateTime.Now);
-    var connection = SqlServicePool.Set("UltranacoPool", (sender, @event) =>
-    {
-      TestContext.Progress.WriteLine($@"SQL Message Info:
-      {@event.Message.ToString()}");
-    });
+    var connection = SqlServicePool.Set("UltranacoPool");
 
-    TestContext.Progress.WriteLine($@"connection state: {connection.State}");
+    TestContext.Progress.WriteLine($@"connection state: {connection}");
     Assert.Pass();
   }
 
