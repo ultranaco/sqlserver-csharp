@@ -12,24 +12,24 @@ namespace Ultranaco.Database.SQLServer.Test;
 
 public class IntegrationTest
 {
-  public IntegrationTest()
-  {
-    IConfiguration configuration = new ConfigurationBuilder()
-   .SetBasePath(Directory.GetCurrentDirectory() + "/../../..")
-   .AddJsonFile("appSettings.json")
-   .Build()
-   .AttachApplicationKeys()
-   .AttachConnectionString();
-
-    var connection = SqlServicePool.Set("MasterPool");
-
-    // TODO: remove or refactor this test, it doesn't do nothing
-    TestContext.Progress.WriteLine($@"IntegrationTest: connection string: {connection}");
-  }
-
   [SetUp]
   public void Setup()
   {
+    IConfiguration configuration = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory() + "/../../..")
+    .AddJsonFile("appSettings.json")
+    .Build()
+    .AttachApplicationKeys()
+    .AttachConnectionString();
+
+
+    SqlServicePool.Set("UltranacoPool");
+    SqlServicePool.Set("MasterPool");
+  }
+
+  public IntegrationTest()
+  {
+
   }
 
   [Test, Order(1)]
