@@ -29,7 +29,16 @@ public class IntegrationTest
 
   public IntegrationTest()
   {
+    IConfiguration configuration = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory() + "/../../..")
+    .AddJsonFile("appSettings.json")
+    .Build()
+    .AttachApplicationKeys()
+    .AttachConnectionString();
 
+
+    SqlServicePool.Set("UltranacoPool");
+    SqlServicePool.Set("MasterPool");
   }
 
   [Test, Order(1)]
