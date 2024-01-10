@@ -33,6 +33,7 @@ namespace Ultranaco.Database.SQLServer.Service
 
       using(var connection = new SqlConnection(this.ConnectionString))
       {
+        connection.Open();
         using (var command = new SqlCommand(sql, connection))
         {
           command.CommandTimeout = commmandTimeout;
@@ -52,6 +53,7 @@ namespace Ultranaco.Database.SQLServer.Service
             parameters = new List<SqlParameter>();
           }
         }
+        connection.Close();
       }
 
       return result;
